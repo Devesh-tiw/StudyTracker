@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyCore — Engineering Study Tracker</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #080c14;
+            --surface: #0e1420;
+            --surface2: #141c2e;
+            --border: #1e2d4a;
+            --accent: #00e5ff;
+            --accent2: #7c3aed;
+            --accent3: #10b981;
+            --accent4: #f59e0b;
+            --accent5: #ef4444;
+            --text: #e2e8f0;
+            --text-dim: #64748b;
+            --text-mid: #94a3b8;
+            --glow: rgba(0, 229, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 72px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 6px;
+            z-index: 100;
+            transition: width 0.3s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .sidebar:hover {
+            width: 200px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -1px;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 40px;
+            transition: width 0.3s;
+            margin-bottom: 24px;
+        }
+
+        .sidebar:hover .logo {
+            width: 160px;
+        }
+
+        .nav-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--glow);
+            border-left-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .nav-label {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar:hover .nav-label {
+            opacity: 1;
+        }
+
+        /* MAIN */
+        .main {
+            margin-left: 72px;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page {
+            display: none;
+            padding: 32px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .page-title span {
+            color: var(--accent);
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .date-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 4px;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* GRID LAYOUTS */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-auto {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* STAT CARD */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-num {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .stat-glow {
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.3;
+        }
+
+        /* INPUT STYLES */
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 10px 14px;
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1);
+        }
+
+        input[type="text"] {
+            flex: 1;
+        }
+
+        select {
+            min-width: 140px;
+        }
+
+        textarea {
+            width: 100%;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            background: #00b8d4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-mid);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid var(--accent5);
+            color: var(--accent5);
+        }
+
+        .btn-danger:hover {
+            background: var(--accent5);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            min-width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* TASK ITEMS */
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .task-item:hover {
+            border-color: rgba(0, 229, 255, 0.3);
+        }
+
+        .task-item.done {
+            opacity: 0.5;
+        }
+
+        .task-item.done .task-text {
+            text-decoration: line-through;
+        }
+
+        .task-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 10px;
+        }
+
+        .task-check.checked {
+            background: var(--accent3);
+            border-color: var(--accent3);
+        }
+
+        .task-check:hover {
+            border-color: var(--accent3);
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .task-meta {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .task-tag {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* PRIORITY COLORS */
+        .priority-high {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .priority-low {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar {
+            height: 6px;
+            background: var(--surface2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s cubic-bezier(.4, 0, .2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            from {
+                transform: translateX(-100%);
+            }
+
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        /* WEEK GOAL */
+        .week-goal {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            animation: slideIn 0.3s ease;
+        }
+
+        .week-goal:hover {
+            border-color: rgba(124, 58, 237, 0.4);
+        }
+
+        .week-goal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .week-goal-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .week-goal-pct {
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            color: var(--accent2);
+        }
+
+        /* MONTH CALENDAR */
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 12px;
+        }
+
+        .month-day-header {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            padding: 8px 0;
+        }
+
+        .month-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            gap: 2px;
+        }
+
+        .month-day:hover {
+            border-color: var(--accent);
+            background: var(--glow);
+        }
+
+        .month-day.today {
+            border-color: var(--accent);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .month-day.has-plan {
+            background: rgba(124, 58, 237, 0.1);
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .month-day.empty {
+            cursor: default;
+        }
+
+        .month-day-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent2);
+        }
+
+        /* SUBJECT CARDS */
+        .subject-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+            animation: slideIn 0.3s ease;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .subject-accent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .subject-name {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .subject-code {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+        }
+
+        /* CHART CONTAINERS */
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 12, 20, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            width: 480px;
+            max-width: 90vw;
+            animation: popIn 0.3s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .modal-row {
+            margin-bottom: 12px;
+        }
+
+        .modal-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* COLOR SWATCHES */
+        .color-swatches {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .color-swatch:hover,
+        .color-swatch.selected {
+            transform: scale(1.2);
+            border-color: white;
+        }
+
+        /* REPORT TAB */
+        .tab-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            transition: all 0.2s;
+        }
+
+        .tab:hover,
+        .tab.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(0, 229, 255, 0.08);
+        }
+
+        /* EMPTY STATE */
+        .empty {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-dim);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-dim);
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 13px;
+            color: var(--accent);
+            z-index: 9999;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 229, 255, 0.2);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SKILL BADGES */
+        .skill-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s;
+            animation: slideIn 0.3s ease;
+        }
+
+        .skill-card:hover {
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .skill-icon {
+            font-size: 28px;
+        }
+
+        .skill-name {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .skill-desc {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .skill-level {
+            margin-left: auto;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent4);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* MONTH PLAN MODAL */
+        .plan-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 16px;
+            }
+
+            .grid-4,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* WEEK PLANNER */
+        .week-day-col {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            min-height: 160px;
+        }
+
+        .week-day-name {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .week-day-col.today-col {
+            border-color: rgba(0, 229, 255, 0.3);
+        }
+
+        .week-day-col.today-col .week-day-name {
+            color: var(--accent);
+        }
+
+        .mini-task {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            background: var(--surface);
+            border-left: 2px solid var(--accent);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">⬡ CORE</div>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+            <span class="nav-icon">⬡</span>
+            <span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="showPage('daytasks')">
+            <span class="nav-icon">◈</span>
+            <span class="nav-label">Day Tasks</span>
+        </div>
+        <div class="nav-item" onclick="showPage('weekgoals')">
+            <span class="nav-icon">◉</span>
+            <span class="nav-label">Week Goals</span>
+        </div>
+        <div class="nav-item" onclick="showPage('monthplan')">
+            <span class="nav-icon">▦</span>
+            <span class="nav-label">Month Planner</span>
+        </div>
+        <div class="nav-item" onclick="showPage('subjects')">
+            <span class="nav-icon">◫</span>
+            <span class="nav-label">Subjects</span>
+        </div>
+        <div class="nav-item" onclick="showPage('skills')">
+            <span class="nav-icon">◆</span>
+            <span class="nav-label">Skills & Extras</span>
+        </div>
+        <div class="nav-item" onclick="showPage('reports')">
+            <span class="nav-icon">◬</span>
+            <span class="nav-label">Reports</span>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+        <!-- ===== DASHBOARD ===== -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Study<span>Core</span></div>
+                    <div class="page-subtitle">// engineering study tracker</div>
+                </div>
+                <div class="date-badge" id="today-date"></div>
+            </div>
+
+            <div class="grid-4" style="margin-bottom:20px;">
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-today" style="color:var(--accent)">0</div>
+                    <div class="stat-label">Today's Tasks</div>
+                    <div class="stat-glow" style="background:var(--accent);"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-done" style="color:var(--accent3)">0</div>
+                    <div class="stat-label">Completed Today</div>
+                    <div class="stat-glow" style="background:var(--accent3);"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-week" style="color:var(--accent2)">0</div>
+                    <div class="stat-label">Week Goals</div>
+                    <div class="stat-glow" style="background:var(--accent2);"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="stat-subjects" style="color:var(--accent4)">0</div>
+                    <div class="stat-label">Total Subjects</div>
+                    <div class="stat-glow" style="background:var(--accent4);"></div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:20px;">
+                <div class="card">
+                    <div class="card-title">📊 Weekly Progress</div>
+                    <div class="chart-wrap" style="height:200px;">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🎯 Subject Distribution</div>
+                    <div class="chart-wrap" style="height:200px;">
+                        <canvas id="subjectDonut"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⚡ Today's Quick Add</div>
+                <div class="input-row">
+                    <input type="text" id="quick-task" placeholder="Add a quick task for today...">
+                    <select id="quick-subject">
+                        <option value="General">General</option>
+                    </select>
+                    <select id="quick-priority">
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="quickAddTask()">+ Add</button>
+                </div>
+                <div id="quick-task-list"></div>
+            </div>
+        </div>
+
+        <!-- ===== DAY TASKS ===== -->
+        <div class="page" id="page-daytasks">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Day <span>Tasks</span></div>
+                    <div class="page-subtitle">// plan and track your daily work</div>
+                </div>
+                <input type="date" id="task-date-filter" onchange="renderDayTasks()">
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-title">➕ New Task</div>
+                        <div class="modal-row">
+                            <div class="modal-label">TASK TITLE</div>
+                            <input type="text" id="dt-title" placeholder="What do you need to study?"
+                                style="width:100%">
+                        </div>
+                        <div class="modal-row">
+                            <div class="modal-label">SUBJECT</div>
+                            <select id="dt-subject" style="width:100%">
+                                <option value="General">General</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <div class="modal-row" style="flex:1">
+                                <div class="modal-label">PRIORITY</div>
+                                <select id="dt-priority" style="width:100%">
+                                    <option value="high">🔴 High</option>
+                                    <option value="medium" selected>🟡 Medium</option>
+                                    <option value="low">🟢 Low</option>
+                                </select>
+                            </div>
+                            <div class="modal-row" style="flex:1">
+                                <div class="modal-label">DATE</div>
+                                <input type="date" id="dt-date" style="width:100%">
+                            </div>
+                        </div>
+                        <div class="modal-row">
+                            <div class="modal-label">NOTES (optional)</div>
+                            <textarea id="dt-notes" placeholder="Any additional notes..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%" onclick="addDayTask()">Add Task</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">📈 Today's Stats</div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                            <span style="font-size:13px;color:var(--text-mid)">Completion Rate</span>
+                            <span id="day-completion-pct"
+                                style="font-family:'Space Mono',monospace;font-size:13px;color:var(--accent3)">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="day-progress-fill"
+                                style="width:0%;background:var(--accent3);"></div>
+                        </div>
+                        <div style="height:160px;margin-top:20px;">
+                            <canvas id="dayPriorityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" id="day-task-heading">📋 Tasks — Today</div>
+                    <div id="day-task-list">
+                        <div class="empty">
+                            <div class="empty-icon">📚</div>
+                            <div class="empty-text">No tasks yet. Add one!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== WEEK GOALS ===== -->
+        <div class="page" id="page-weekgoals">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Week <span>Goals</span></div>
+                    <div class="page-subtitle">// set and track your weekly objectives</div>
+                </div>
+                <button class="btn btn-primary" onclick="openWeekGoalModal()">+ New Goal</button>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-title">🗓️ This Week at a Glance</div>
+                        <div
+                            style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:11px;">
+                            <div id="week-day-0" class="week-day-col"></div>
+                            <div id="week-day-1" class="week-day-col"></div>
+                            <div id="week-day-2" class="week-day-col"></div>
+                            <div id="week-day-3" class="week-day-col"></div>
+                            <div id="week-day-4" class="week-day-col"></div>
+                            <div id="week-day-5" class="week-day-col"></div>
+                            <div id="week-day-6" class="week-day-col"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📊 Goal Completion</div>
+                        <div style="height:200px;">
+                            <canvas id="weekGoalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎯 Weekly Goals</div>
+                    <div id="week-goal-list">
+                        <div class="empty">
+                            <div class="empty-icon">🎯</div>
+                            <div class="empty-text">No weekly goals. Add one!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== MONTH PLANNER ===== -->
+        <div class="page" id="page-monthplan">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Month <span>Planner</span></div>
+                    <div class="page-subtitle">// visualize your entire month</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button class="btn btn-ghost" onclick="changeMonth(-1)">← Prev</button>
+                    <span id="month-label"
+                        style="font-family:'Space Mono',monospace;font-size:13px;color:var(--accent)"></span>
+                    <button class="btn btn-ghost" onclick="changeMonth(1)">Next →</button>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card" style="grid-column:1/-1;">
+                    <div class="card-title">📅 Monthly Overview</div>
+                    <div class="month-grid" id="month-header-row">
+                        <div class="month-day-header">SUN</div>
+                        <div class="month-day-header">MON</div>
+                        <div class="month-day-header">TUE</div>
+                        <div class="month-day-header">WED</div>
+                        <div class="month-day-header">THU</div>
+                        <div class="month-day-header">FRI</div>
+                        <div class="month-day-header">SAT</div>
+                    </div>
+                    <div class="month-grid" id="month-days-grid"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📝 Month Plans</div>
+                    <div id="month-plan-list">
+                        <div class="empty">
+                            <div class="empty-icon">📅</div>
+                            <div class="empty-text">Click a day to add a plan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Monthly Task Distribution</div>
+                    <div style="height:220px;">
+                        <canvas id="monthBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SUBJECTS ===== -->
+        <div class="page" id="page-subjects">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">My <span>Subjects</span></div>
+                    <div class="page-subtitle">// manage your engineering subjects</div>
+                </div>
+                <button class="btn btn-primary" onclick="openSubjectModal()">+ Add Subject</button>
+            </div>
+
+            <div id="subject-grid" class="grid-auto">
+                <div class="empty" style="grid-column:1/-1;">
+                    <div class="empty-icon">📘</div>
+                    <div class="empty-text">No subjects added. Add your engineering subjects!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SKILLS ===== -->
+        <div class="page" id="page-skills">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Skills & <span>Extras</span></div>
+                    <div class="page-subtitle">// track your skills and favorite topics</div>
+                </div>
+                <button class="btn btn-primary" onclick="openSkillModal()">+ Add Skill</button>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:20px;">
+                <div class="card">
+                    <div class="card-title">🌟 Skill Level Overview</div>
+                    <div style="height:220px;">
+                        <canvas id="skillRadar"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🏆 Skill Progress</div>
+                    <div id="skill-progress-list" style="max-height:240px;overflow-y:auto;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⚡ My Skills & Favorite Topics</div>
+                <div id="skill-list" class="grid-auto" style="margin-top:8px;">
+                    <div class="empty">
+                        <div class="empty-icon">⚡</div>
+                        <div class="empty-text">Add skills, hobbies, or favorite topics!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== REPORTS ===== -->
+        <div class="page" id="page-reports">
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Study <span>Reports</span></div>
+                    <div class="page-subtitle">// analyze your performance</div>
+                </div>
+            </div>
+
+            <div class="tab-row" id="report-tabs">
+                <div class="tab active" onclick="showReportTab('overview')">Overview</div>
+                <div class="tab" onclick="showReportTab('subject-wise')">By Subject</div>
+                <div class="tab" onclick="showReportTab('daily-trend')">Daily Trend</div>
+                <div class="tab" onclick="showReportTab('priority-analysis')">Priority Analysis</div>
+            </div>
+
+            <div id="report-overview">
+                <div class="grid-4" style="margin-bottom:20px;">
+                    <div class="stat-card">
+                        <div class="stat-num" id="r-total-tasks" style="color:var(--accent)">0</div>
+                        <div class="stat-label">Total Tasks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="r-completed" style="color:var(--accent3)">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="r-rate" style="color:var(--accent2)">0%</div>
+                        <div class="stat-label">Completion Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="r-streak" style="color:var(--accent4)">0</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">📈 Completion Over Time</div>
+                        <div style="height:240px;"><canvas id="reportLineChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🍩 Tasks by Subject</div>
+                        <div style="height:240px;"><canvas id="reportDonutChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="report-subject-wise" style="display:none;">
+                <div id="subject-report-grid" class="grid-auto"></div>
+            </div>
+
+            <div id="report-daily-trend" style="display:none;">
+                <div class="card">
+                    <div class="card-title">📊 Daily Task Completion — Last 14 Days</div>
+                    <div style="height:300px;"><canvas id="dailyTrendChart"></canvas></div>
+                </div>
+            </div>
+
+            <div id="report-priority-analysis" style="display:none;">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">🔴 Priority Breakdown</div>
+                        <div style="height:260px;"><canvas id="priorityBarChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📋 Priority Summary</div>
+                        <div id="priority-summary" style="margin-top:8px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODALS -->
+    <div id="modal-overlay" style="display:none;" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" id="modal-content" onclick="e=>e.stopPropagation()">
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // DATA STORE
+        // ============================================================
+        let store = {
+            tasks: [],
+            weekGoals: [],
+            monthPlans: {},
+            subjects: [],
+            skills: [],
+        };
+
+        let currentMonth = new Date();
+        let selectedDay = null;
+        const COLORS = ['#00e5ff', '#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#8b5cf6', '#06b6d4', '#84cc16'];
+
+        function save() { /* in-memory only */ }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            event?.currentTarget?.classList.add('active');
+            if (id === 'dashboard') renderDashboard();
+            if (id === 'daytasks') renderDayTasks();
+            if (id === 'weekgoals') renderWeekGoals();
+            if (id === 'monthplan') renderMonthPlanner();
+            if (id === 'subjects') renderSubjects();
+            if (id === 'skills') renderSkills();
+            if (id === 'reports') renderReports();
+        }
+
+        // ============================================================
+        // DATE HELPERS
+        // ============================================================
+        function today() { return new Date().toISOString().split('T')[0]; }
+        function fmtDate(d) {
+            return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // ============================================================
+        // DASHBOARD
+        // ============================================================
+        let weeklyChartInst, subjectDonutInst;
+
+        function renderDashboard() {
+            const todayStr = today();
+            const todayTasks = store.tasks.filter(t => t.date === todayStr);
+            const done = todayTasks.filter(t => t.done).length;
+
+            document.getElementById('stat-today').textContent = todayTasks.length;
+            document.getElementById('stat-done').textContent = done;
+            document.getElementById('stat-week').textContent = store.weekGoals.length;
+            document.getElementById('stat-subjects').textContent = store.subjects.length;
+            document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+            // Quick task list
+            renderQuickTaskList();
+
+            // Weekly chart (last 7 days)
+            const days = [], totals = [], completeds = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const ds = d.toISOString().split('T')[0];
+                days.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+                const t = store.tasks.filter(x => x.date === ds);
+                totals.push(t.length);
+                completeds.push(t.filter(x => x.done).length);
+            }
+
+            if (weeklyChartInst) weeklyChartInst.destroy();
+            weeklyChartInst = new Chart(document.getElementById('weeklyChart'), {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [
+                        { label: 'Total', data: totals, backgroundColor: 'rgba(0,229,255,0.15)', borderColor: '#00e5ff', borderWidth: 2, borderRadius: 4 },
+                        { label: 'Done', data: completeds, backgroundColor: 'rgba(16,185,129,0.3)', borderColor: '#10b981', borderWidth: 2, borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne' } } } }, scales: { x: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } } } }
+            });
+
+            // Subject donut
+            const subjectCounts = {};
+            store.tasks.forEach(t => { subjectCounts[t.subject] = (subjectCounts[t.subject] || 0) + 1; });
+            const labels = Object.keys(subjectCounts), data = Object.values(subjectCounts);
+            const bgs = labels.map((_, i) => COLORS[i % COLORS.length]);
+
+            if (subjectDonutInst) subjectDonutInst.destroy();
+            if (labels.length === 0) {
+                if (subjectDonutInst) subjectDonutInst.destroy();
+                return;
+            }
+            subjectDonutInst = new Chart(document.getElementById('subjectDonut'), {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data, backgroundColor: bgs.map(c => c + '55'), borderColor: bgs, borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { family: 'Syne', size: 11 }, boxWidth: 12 } } } }
+            });
+        }
+
+        function renderQuickTaskList() {
+            const todayStr = today();
+            const tasks = store.tasks.filter(t => t.date === todayStr);
+            const el = document.getElementById('quick-task-list');
+            if (!tasks.length) { el.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px 0;">No tasks for today yet.</div>'; return; }
+            el.innerHTML = tasks.slice(0, 5).map(t => `
+    <div class="task-item ${t.done ? 'done' : ''}">
+      <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask('${t.id}')">
+        ${t.done ? '✓' : ''}
+      </div>
+      <div class="task-text">${t.title}</div>
+      <span class="task-tag priority-${t.priority}">${t.priority}</span>
+      <span class="task-meta">${t.subject}</span>
+    </div>`).join('');
+            if (tasks.length > 5) el.innerHTML += `<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px;">+${tasks.length - 5} more — see Day Tasks</div>`;
+        }
+
+        function quickAddTask() {
+            const title = document.getElementById('quick-task').value.trim();
+            if (!title) return;
+            const task = {
+                id: Date.now().toString(),
+                title,
+                subject: document.getElementById('quick-subject').value,
+                priority: document.getElementById('quick-priority').value,
+                date: today(),
+                done: false,
+                notes: ''
+            };
+            store.tasks.push(task);
+            document.getElementById('quick-task').value = '';
+            renderDashboard();
+            toast('Task added!');
+        }
+
+        // ============================================================
+        // DAY TASKS
+        // ============================================================
+        let dayPriorityChartInst;
+
+        function renderDayTasks() {
+            const dtDate = document.getElementById('task-date-filter');
+            if (!dtDate.value) dtDate.value = today();
+            const sel = dtDate.value;
+
+            document.getElementById('day-task-heading').textContent = `📋 Tasks — ${sel === today() ? 'Today' : fmtDate(sel)}`;
+
+            const tasks = store.tasks.filter(t => t.date === sel);
+            const done = tasks.filter(t => t.done).length;
+            const pct = tasks.length ? Math.round(done / tasks.length * 100) : 0;
+
+            document.getElementById('day-completion-pct').textContent = pct + '%';
+            document.getElementById('day-progress-fill').style.width = pct + '%';
+
+            // Priority chart
+            const high = tasks.filter(t => t.priority === 'high');
+            const mid = tasks.filter(t => t.priority === 'medium');
+            const low = tasks.filter(t => t.priority === 'low');
+
+            if (dayPriorityChartInst) dayPriorityChartInst.destroy();
+            dayPriorityChartInst = new Chart(document.getElementById('dayPriorityChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['High', 'Medium', 'Low'],
+                    datasets: [{
+                        data: [high.length, mid.length, low.length],
+                        backgroundColor: ['rgba(239,68,68,0.3)', 'rgba(245,158,11,0.3)', 'rgba(16,185,129,0.3)'],
+                        borderColor: ['#ef4444', '#f59e0b', '#10b981'],
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne', size: 11 } } } } }
+            });
+
+            const el = document.getElementById('day-task-list');
+            if (!tasks.length) {
+                el.innerHTML = '<div class="empty"><div class="empty-icon">📚</div><div class="empty-text">No tasks for this day.</div></div>';
+                return;
+            }
+
+            const sorted = [...tasks].sort((a, b) => {
+                const p = { high: 0, medium: 1, low: 2 };
+                return p[a.priority] - p[b.priority];
+            });
+
+            el.innerHTML = sorted.map(t => `
+    <div class="task-item ${t.done ? 'done' : ''}">
+      <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask('${t.id}')">
+        ${t.done ? '✓' : ''}
+      </div>
+      <div style="flex:1">
+        <div class="task-text">${t.title}</div>
+        ${t.notes ? `<div class="task-meta">${t.notes}</div>` : ''}
+      </div>
+      <span class="task-tag priority-${t.priority}">${t.priority.toUpperCase()}</span>
+      <span class="task-meta">${t.subject}</span>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteTask('${t.id}')">✕</button>
+    </div>`).join('');
+        }
+
+        function addDayTask() {
+            const title = document.getElementById('dt-title').value.trim();
+            if (!title) return toast('Enter a task title!');
+            const task = {
+                id: Date.now().toString(),
+                title,
+                subject: document.getElementById('dt-subject').value,
+                priority: document.getElementById('dt-priority').value,
+                date: document.getElementById('dt-date').value || today(),
+                done: false,
+                notes: document.getElementById('dt-notes').value.trim()
+            };
+            store.tasks.push(task);
+            document.getElementById('dt-title').value = '';
+            document.getElementById('dt-notes').value = '';
+            renderDayTasks();
+            toast('Task added!');
+        }
+
+        function toggleTask(id) {
+            const t = store.tasks.find(x => x.id === id);
+            if (t) { t.done = !t.done; renderDayTasks(); renderQuickTaskList(); }
+        }
+
+        function deleteTask(id) {
+            store.tasks = store.tasks.filter(x => x.id !== id);
+            renderDayTasks();
+            toast('Task removed.');
+        }
+
+        // ============================================================
+        // WEEK GOALS
+        // ============================================================
+        let weekGoalChartInst;
+
+        function renderWeekGoals() {
+            // Week day mini view
+            const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            const now = new Date();
+            const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
+
+            days.forEach((d, i) => {
+                const dayDate = new Date(startOfWeek); dayDate.setDate(startOfWeek.getDate() + i);
+                const ds = dayDate.toISOString().split('T')[0];
+                const dayTasks = store.tasks.filter(t => t.date === ds);
+                const el = document.getElementById('week-day-' + i);
+                const isToday = ds === today();
+                el.className = 'week-day-col' + (isToday ? ' today-col' : '');
+                el.innerHTML = `<div class="week-day-name">${d}<br><span style="font-size:9px;font-weight:400;">${dayDate.getDate()}</span></div>
+      ${dayTasks.slice(0, 4).map(t => `<div class="mini-task" title="${t.title}">${t.title.substring(0, 12)}${t.title.length > 12 ? '…' : ''}</div>`).join('')}
+      ${dayTasks.length > 4 ? `<div style="font-size:9px;color:var(--text-dim);padding:2px 4px;">+${dayTasks.length - 4} more</div>` : ''}
+    `;
+            });
+
+            // Week goals list
+            const el = document.getElementById('week-goal-list');
+            if (!store.weekGoals.length) {
+                el.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">No weekly goals. Add one!</div></div>';
+            } else {
+                el.innerHTML = store.weekGoals.map(g => {
+                    const pct = Math.min(100, Math.round((g.done / Math.max(1, g.total)) * 100));
+                    return `
+        <div class="week-goal">
+          <div class="week-goal-header">
+            <div class="week-goal-title">${g.title}</div>
+            <span class="week-goal-pct">${pct}%</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">${g.subject} • ${g.done}/${g.total} subtasks</div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%;background:${g.color || 'var(--accent2)'}"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="incrementGoal('${g.id}')">+1 Done</button>
+            <button class="btn btn-ghost btn-sm" onclick="decrementGoal('${g.id}')">-1</button>
+            <button class="btn btn-danger btn-sm btn-icon" style="margin-left:auto" onclick="deleteWeekGoal('${g.id}')">✕</button>
+          </div>
+        </div>`;
+                }).join('');
+            }
+
+            // Chart
+            if (weekGoalChartInst) weekGoalChartInst.destroy();
+            if (!store.weekGoals.length) return;
+            weekGoalChartInst = new Chart(document.getElementById('weekGoalChart'), {
+                type: 'bar',
+                data: {
+                    labels: store.weekGoals.map(g => g.title.substring(0, 15)),
+                    datasets: [
+                        { label: 'Total', data: store.weekGoals.map(g => g.total), backgroundColor: 'rgba(0,229,255,0.1)', borderColor: '#00e5ff', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Done', data: store.weekGoals.map(g => g.done), backgroundColor: 'rgba(124,58,237,0.3)', borderColor: '#7c3aed', borderWidth: 1, borderRadius: 4 }
+                    ]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne' } } } }, scales: { x: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#94a3b8', font: { family: 'Syne', size: 11 } }, grid: { color: '#1e2d4a' } } } }
+            });
+        }
+
+        function openWeekGoalModal() {
+            const subOpts = ['General', ...store.subjects.map(s => s.name)].map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('modal-body').innerHTML = `
+    <div class="modal-title">New Weekly Goal</div>
+    <div class="modal-row"><div class="modal-label">GOAL TITLE</div><input type="text" id="wg-title" placeholder="e.g. Complete DSA Chapter 5" style="width:100%"></div>
+    <div class="modal-row"><div class="modal-label">SUBJECT</div><select id="wg-subject" style="width:100%">${subOpts}</select></div>
+    <div style="display:flex;gap:10px;">
+      <div class="modal-row" style="flex:1"><div class="modal-label">TARGET TASKS</div><input type="text" id="wg-total" placeholder="10" style="width:100%"></div>
+    </div>
+    <div class="modal-row"><div class="modal-label">COLOR</div>
+      <div class="color-swatches">${COLORS.map((c, i) => `<div class="color-swatch ${i === 1 ? 'selected' : ''}" style="background:${c}" onclick="selectColor(this,'${c}')"></div>`).join('')}</div>
+      <input type="hidden" id="wg-color" value="${COLORS[1]}">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveWeekGoal()">Save Goal</button>
+    </div>`;
+            openModal();
+        }
+
+        function saveWeekGoal() {
+            const title = document.getElementById('wg-title').value.trim();
+            if (!title) return toast('Enter a goal title!');
+            store.weekGoals.push({
+                id: Date.now().toString(),
+                title,
+                subject: document.getElementById('wg-subject').value,
+                total: parseInt(document.getElementById('wg-total').value) || 5,
+                done: 0,
+                color: document.getElementById('wg-color').value
+            });
+            closeModal();
+            renderWeekGoals();
+            toast('Goal added!');
+        }
+
+        function incrementGoal(id) { const g = store.weekGoals.find(x => x.id === id); if (g && g.done < g.total) { g.done++; renderWeekGoals(); } }
+        function decrementGoal(id) { const g = store.weekGoals.find(x => x.id === id); if (g && g.done > 0) { g.done--; renderWeekGoals(); } }
+        function deleteWeekGoal(id) { store.weekGoals = store.weekGoals.filter(x => x.id !== id); renderWeekGoals(); toast('Goal removed.'); }
+
+        // ============================================================
+        // MONTH PLANNER
+        // ============================================================
+        let monthBarChartInst;
+
+        function renderMonthPlanner() {
+            const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
+            document.getElementById('month-label').textContent = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(y, m, 1).getDay();
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            const todayD = new Date().getDate(), todayM = new Date().getMonth(), todayY = new Date().getFullYear();
+
+            const grid = document.getElementById('month-days-grid');
+            let html = '';
+
+            for (let i = 0; i < firstDay; i++) html += '<div class="month-day empty"></div>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isToday = d === todayD && m === todayM && y === todayY;
+                const plans = store.monthPlans[ds] || [];
+                const hasTasks = store.tasks.some(t => t.date === ds);
+                const dotColor = plans.length ? 'var(--accent2)' : hasTasks ? 'var(--accent3)' : '';
+                html += `<div class="month-day ${isToday ? 'today' : ''} ${(plans.length || hasTasks) ? 'has-plan' : ''}" onclick="selectDay('${ds}')">
+      <span>${d}</span>
+      ${dotColor ? `<div class="month-day-dot" style="background:${dotColor}"></div>` : ''}
+    </div>`;
+            }
+            grid.innerHTML = html;
+
+            renderMonthPlanList();
+            renderMonthBarChart();
+        }
+
+        function selectDay(ds) {
+            selectedDay = ds;
+            openDayPlanModal(ds);
+        }
+
+        function openDayPlanModal(ds) {
+            const existing = (store.monthPlans[ds] || []).map(p => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--surface2);border-radius:6px;margin-bottom:6px;">
+      <div style="flex:1;font-size:13px;">${p.text}</div>
+      <span style="font-size:10px;padding:2px 8px;border-radius:3px;background:${p.color}33;color:${p.color};">${p.tag}</span>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="removePlan('${ds}','${p.id}')">✕</button>
+    </div>`).join('');
+
+            document.getElementById('modal-body').innerHTML = `
+    <div class="modal-title">📅 ${fmtDate(ds)}</div>
+    <div id="day-plans-existing">${existing || '<div style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">No plans yet.</div>'}</div>
+    <div class="modal-row"><div class="modal-label">ADD PLAN</div><input type="text" id="plan-text" placeholder="e.g. Study Thermodynamics Ch.3" style="width:100%"></div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <select id="plan-tag" style="flex:1">
+        <option value="Study">Study</option>
+        <option value="Exam">Exam</option>
+        <option value="Assignment">Assignment</option>
+        <option value="Lab">Lab</option>
+        <option value="Project">Project</option>
+        <option value="Revision">Revision</option>
+      </select>
+      <div class="color-swatches">${COLORS.slice(0, 6).map((c, i) => `<div class="color-swatch ${i === 0 ? 'selected' : ''}" style="background:${c};width:24px;height:24px;" onclick="selectColor(this,'${c}')"></div>`).join('')}</div>
+      <input type="hidden" id="plan-color" value="${COLORS[0]}">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="addPlan('${ds}')">+ Add Plan</button>
+    </div>`;
+            openModal();
+        }
+
+        function addPlan(ds) {
+            const text = document.getElementById('plan-text').value.trim();
+            if (!text) return toast('Enter a plan!');
+            if (!store.monthPlans[ds]) store.monthPlans[ds] = [];
+            store.monthPlans[ds].push({ id: Date.now().toString(), text, tag: document.getElementById('plan-tag').value, color: document.getElementById('plan-color').value });
+            document.getElementById('plan-text').value = '';
+            renderMonthPlanner();
+            toast('Plan added!');
+            // Re-render modal content
+            openDayPlanModal(ds);
+        }
+
+        function removePlan(ds, id) {
+            store.monthPlans[ds] = (store.monthPlans[ds] || []).filter(p => p.id !== id);
+            renderMonthPlanner();
+            openDayPlanModal(ds);
+        }
+
+        function renderMonthPlanList() {
+            const el = document.getElementById('month-plan-list');
+            const allPlans = [];
+            Object.entries(store.monthPlans).forEach(([d, plans]) => {
+                plans.forEach(p => allPlans.push({ ...p, date: d }));
+            });
+            allPlans.sort((a, b) => a.date.localeCompare(b.date));
+            if (!allPlans.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Click a day to add a plan</div></div>'; return; }
+            el.innerHTML = allPlans.map(p => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;border-left:3px solid ${p.color};">
+      <div>
+        <div style="font-size:13px;font-weight:700;">${p.text}</div>
+        <div style="font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;">${fmtDate(p.date)}</div>
+      </div>
+      <span style="margin-left:auto;font-size:10px;padding:2px 8px;border-radius:3px;background:${p.color}22;color:${p.color};">${p.tag}</span>
+    </div>`).join('');
+        }
+
+        function renderMonthBarChart() {
+            const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            const labels = [], data = [];
+            for (let d = 1; d <= daysInMonth; d++) {
+                const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                labels.push(d);
+                data.push(store.tasks.filter(t => t.date === ds && t.done).length);
+            }
+            if (monthBarChartInst) monthBarChartInst.destroy();
+            monthBarChartInst = new Chart(document.getElementById('monthBarChart'), {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Completed Tasks', data, backgroundColor: 'rgba(0,229,255,0.2)', borderColor: '#00e5ff', borderWidth: 1, borderRadius: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } } } }
+            });
+        }
+
+        function changeMonth(dir) { currentMonth.setMonth(currentMonth.getMonth() + dir); renderMonthPlanner(); }
+
+        // ============================================================
+        // SUBJECTS
+        // ============================================================
+        function renderSubjects() {
+            const el = document.getElementById('subject-grid');
+            if (!store.subjects.length) {
+                el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📘</div><div class="empty-text">No subjects. Add your engineering subjects!</div></div>';
+                return;
+            }
+            el.innerHTML = store.subjects.map(s => {
+                const tasks = store.tasks.filter(t => t.subject === s.name);
+                const done = tasks.filter(t => t.done).length;
+                const pct = tasks.length ? Math.round(done / tasks.length * 100) : 0;
+                return `
+      <div class="subject-card">
+        <div class="subject-accent" style="background:${s.color}"></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <div class="subject-name">${s.name}</div>
+            <div class="subject-code">${s.code}</div>
+          </div>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteSubject('${s.id}')">✕</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-bottom:6px;">
+          <span>${tasks.length} tasks</span>
+          <span style="font-family:'Space Mono',monospace;color:${s.color}">${pct}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%;background:${s.color}"></div>
+        </div>
+        <div style="margin-top:14px;height:100px;">
+          <canvas id="subj-chart-${s.id}"></canvas>
+        </div>
+      </div>`;
+            }).join('');
+
+            // Mini charts per subject
+            store.subjects.forEach(s => {
+                const tasks = store.tasks.filter(t => t.subject === s.name);
+                const last7 = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(); d.setDate(d.getDate() - i);
+                    const ds = d.toISOString().split('T')[0];
+                    last7.push(tasks.filter(t => t.date === ds && t.done).length);
+                }
+                new Chart(document.getElementById(`subj-chart-${s.id}`), {
+                    type: 'line',
+                    data: {
+                        labels: ['', '', '', '', '', '', ''],
+                        datasets: [{ data: last7, fill: true, backgroundColor: s.color + '22', borderColor: s.color, borderWidth: 2, pointRadius: 3, pointBackgroundColor: s.color, tension: 0.4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false, min: 0 } } }
+                });
+            });
+        }
+
+        function openSubjectModal() {
+            document.getElementById('modal-body').innerHTML = `
+    <div class="modal-title">Add Subject</div>
+    <div class="modal-row"><div class="modal-label">SUBJECT NAME</div><input type="text" id="sub-name" placeholder="e.g. Data Structures & Algorithms" style="width:100%"></div>
+    <div class="modal-row"><div class="modal-label">SUBJECT CODE</div><input type="text" id="sub-code" placeholder="e.g. CS301" style="width:100%"></div>
+    <div class="modal-row"><div class="modal-label">COLOR</div>
+      <div class="color-swatches">${COLORS.map((c, i) => `<div class="color-swatch ${i === 0 ? 'selected' : ''}" style="background:${c}" onclick="selectColor(this,'${c}')"></div>`).join('')}</div>
+      <input type="hidden" id="sub-color" value="${COLORS[0]}">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSubject()">Save Subject</button>
+    </div>`;
+            openModal();
+        }
+
+        function saveSubject() {
+            const name = document.getElementById('sub-name').value.trim();
+            if (!name) return toast('Enter a subject name!');
+            if (store.subjects.find(s => s.name === name)) return toast('Subject already exists!');
+            store.subjects.push({ id: Date.now().toString(), name, code: document.getElementById('sub-code').value.trim() || '—', color: document.getElementById('sub-color').value });
+            closeModal();
+            updateSubjectDropdowns();
+            renderSubjects();
+            toast('Subject added!');
+        }
+
+        function deleteSubject(id) {
+            store.subjects = store.subjects.filter(x => x.id !== id);
+            updateSubjectDropdowns();
+            renderSubjects();
+            toast('Subject removed.');
+        }
+
+        function updateSubjectDropdowns() {
+            const opts = ['<option value="General">General</option>', ...store.subjects.map(s => `<option value="${s.name}">${s.name}</option>`)].join('');
+            ['quick-subject', 'dt-subject', 'dt-subject'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
+            document.querySelectorAll('[id^="dt-subject"],[id^="quick-subject"]').forEach(el => el.innerHTML = opts);
+        }
+
+        // ============================================================
+        // SKILLS
+        // ============================================================
+        let skillRadarInst;
+
+        function renderSkills() {
+            // Skill list
+            const listEl = document.getElementById('skill-list');
+            if (!store.skills.length) {
+                listEl.innerHTML = '<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">Add skills, hobbies, or favorite topics!</div></div>';
+            } else {
+                listEl.innerHTML = store.skills.map(sk => `
+      <div class="skill-card">
+        <div class="skill-icon">${sk.icon}</div>
+        <div>
+          <div class="skill-name">${sk.name}</div>
+          <div class="skill-desc">${sk.desc || sk.category}</div>
+        </div>
+        <span class="skill-level">${['Beginner', 'Intermediate', 'Advanced', 'Expert'][sk.level - 1] || 'Beginner'}</span>
+        <button class="btn btn-danger btn-sm btn-icon" style="margin-left:8px" onclick="deleteSkill('${sk.id}')">✕</button>
+      </div>`).join('');
+            }
+
+            // Progress list
+            const progEl = document.getElementById('skill-progress-list');
+            if (!store.skills.length) { progEl.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">Add skills to see progress</div>'; return; }
+            progEl.innerHTML = store.skills.map(sk => {
+                const pct = [25, 50, 75, 100][sk.level - 1] || 25;
+                return `
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:12px;font-weight:700;">${sk.icon} ${sk.name}</span>
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent4)">${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--accent4)"></div></div>
+      </div>`;
+            }).join('');
+
+            // Radar chart
+            if (skillRadarInst) skillRadarInst.destroy();
+            if (store.skills.length < 3) return;
+            skillRadarInst = new Chart(document.getElementById('skillRadar'), {
+                type: 'radar',
+                data: {
+                    labels: store.skills.slice(0, 8).map(s => s.name),
+                    datasets: [{ data: store.skills.slice(0, 8).map(s => s.level * 25), fill: true, backgroundColor: 'rgba(245,158,11,0.15)', borderColor: '#f59e0b', borderWidth: 2, pointBackgroundColor: '#f59e0b', pointRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { r: { ticks: { display: false, stepSize: 25 }, grid: { color: '#1e2d4a' }, pointLabels: { color: '#94a3b8', font: { family: 'Syne', size: 11 } }, min: 0, max: 100 } } }
+            });
+        }
+
+        function openSkillModal() {
+            const icons = ['💻', '⚡', '🔬', '🧮', '🔧', '🎨', '🎵', '📱', '🌐', '🎮', '📷', '🧠', '🤖', '🚀', '🏋️', '🎭', '📊', '🔐'];
+            document.getElementById('modal-body').innerHTML = `
+    <div class="modal-title">Add Skill / Topic</div>
+    <div class="modal-row"><div class="modal-label">ICON</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">${icons.map((ic, i) => `<span style="font-size:22px;cursor:pointer;padding:4px;border-radius:6px;border:1px solid ${i === 0 ? 'var(--accent)' : 'var(--border)'};" onclick="selectIcon(this,'${ic}')">${ic}</span>`).join('')}</div>
+      <input type="hidden" id="sk-icon" value="${icons[0]}">
+    </div>
+    <div class="modal-row"><div class="modal-label">SKILL / TOPIC NAME</div><input type="text" id="sk-name" placeholder="e.g. Machine Learning, Guitar, Photography" style="width:100%"></div>
+    <div class="modal-row"><div class="modal-label">CATEGORY</div>
+      <select id="sk-cat" style="width:100%">
+        <option>Technical Skill</option><option>Favorite Subject</option><option>Hobby</option><option>Language</option><option>Tool/Framework</option><option>Other</option>
+      </select>
+    </div>
+    <div class="modal-row"><div class="modal-label">DESCRIPTION</div><input type="text" id="sk-desc" placeholder="Brief description..." style="width:100%"></div>
+    <div class="modal-row"><div class="modal-label">LEVEL</div>
+      <select id="sk-level" style="width:100%">
+        <option value="1">1 — Beginner</option>
+        <option value="2">2 — Intermediate</option>
+        <option value="3">3 — Advanced</option>
+        <option value="4">4 — Expert</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSkill()">Save Skill</button>
+    </div>`;
+            openModal();
+        }
+
+        function selectIcon(el, icon) {
+            document.querySelectorAll('#modal-body span[style*="cursor:pointer"]').forEach(s => s.style.borderColor = 'var(--border)');
+            el.style.borderColor = 'var(--accent)';
+            document.getElementById('sk-icon').value = icon;
+        }
+
+        function saveSkill() {
+            const name = document.getElementById('sk-name').value.trim();
+            if (!name) return toast('Enter a skill name!');
+            store.skills.push({ id: Date.now().toString(), name, icon: document.getElementById('sk-icon').value, category: document.getElementById('sk-cat').value, desc: document.getElementById('sk-desc').value.trim(), level: parseInt(document.getElementById('sk-level').value) || 1 });
+            closeModal();
+            renderSkills();
+            toast('Skill added!');
+        }
+
+        function deleteSkill(id) { store.skills = store.skills.filter(x => x.id !== id); renderSkills(); }
+
+        // ============================================================
+        // REPORTS
+        // ============================================================
+        let reportLineInst, reportDonutInst, dailyTrendInst, priorityBarInst, subjectReportCharts = [];
+
+        function renderReports() {
+            const total = store.tasks.length, done = store.tasks.filter(t => t.done).length;
+            document.getElementById('r-total-tasks').textContent = total;
+            document.getElementById('r-completed').textContent = done;
+            document.getElementById('r-rate').textContent = total ? Math.round(done / total * 100) + '%' : '0%';
+            document.getElementById('r-streak').textContent = calcStreak();
+
+            // Line chart – last 14 days
+            const lLabels = [], lDone = [], lTotal = [];
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const ds = d.toISOString().split('T')[0];
+                lLabels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                const t = store.tasks.filter(x => x.date === ds);
+                lTotal.push(t.length);
+                lDone.push(t.filter(x => x.done).length);
+            }
+            if (reportLineInst) reportLineInst.destroy();
+            reportLineInst = new Chart(document.getElementById('reportLineChart'), {
+                type: 'line',
+                data: {
+                    labels: lLabels, datasets: [
+                        { label: 'Total', data: lTotal, fill: false, borderColor: '#00e5ff', backgroundColor: 'transparent', tension: 0.4, pointRadius: 3 },
+                        { label: 'Done', data: lDone, fill: true, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.4, pointRadius: 3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne' } } } }, scales: { x: { ticks: { color: '#64748b', maxRotation: 45 }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } } } }
+            });
+
+            // Subject donut
+            const sc = {};
+            store.tasks.filter(t => t.done).forEach(t => { sc[t.subject] = (sc[t.subject] || 0) + 1; });
+            if (reportDonutInst) reportDonutInst.destroy();
+            const scK = Object.keys(sc), scV = Object.values(sc);
+            if (scK.length) {
+                reportDonutInst = new Chart(document.getElementById('reportDonutChart'), {
+                    type: 'doughnut',
+                    data: { labels: scK, datasets: [{ data: scV, backgroundColor: COLORS.slice(0, scK.length).map(c => c + '44'), borderColor: COLORS.slice(0, scK.length), borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { family: 'Syne', size: 11 } } } } }
+                });
+            }
+        }
+
+        function showReportTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            ['overview', 'subject-wise', 'daily-trend', 'priority-analysis'].forEach(id => { document.getElementById('report-' + id).style.display = 'none'; });
+            document.getElementById('report-' + tab).style.display = 'block';
+
+            if (tab === 'subject-wise') renderSubjectWiseReport();
+            if (tab === 'daily-trend') renderDailyTrend();
+            if (tab === 'priority-analysis') renderPriorityAnalysis();
+        }
+
+        function renderSubjectWiseReport() {
+            const el = document.getElementById('subject-report-grid');
+            const allSubjects = ['General', ...store.subjects.map(s => s.name)];
+            el.innerHTML = '';
+            allSubjects.forEach((name, idx) => {
+                const tasks = store.tasks.filter(t => t.subject === name);
+                if (!tasks.length) return;
+                const done = tasks.filter(t => t.done).length;
+                const pct = Math.round(done / tasks.length * 100);
+                const color = store.subjects.find(s => s.name === name)?.color || COLORS[idx % COLORS.length];
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+        <div style="font-size:15px;font-weight:800;">${name}</div>
+        <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:13px;color:${color}">${pct}%</span>
+      </div>
+      <div class="progress-bar" style="margin-bottom:12px;"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--text-dim);">
+        <span>Total: <strong style="color:var(--text)">${tasks.length}</strong></span>
+        <span>Done: <strong style="color:${color}">${done}</strong></span>
+        <span>Left: <strong style="color:var(--text)">${tasks.length - done}</strong></span>
+      </div>
+      <div style="height:120px;margin-top:12px;"><canvas id="sr-chart-${idx}"></canvas></div>`;
+                el.appendChild(div);
+                setTimeout(() => {
+                    const last7 = [];
+                    for (let i = 6; i >= 0; i--) {
+                        const d = new Date(); d.setDate(d.getDate() - i);
+                        const ds = d.toISOString().split('T')[0];
+                        last7.push(tasks.filter(t => t.date === ds && t.done).length);
+                    }
+                    new Chart(document.getElementById(`sr-chart-${idx}`), {
+                        type: 'bar',
+                        data: { labels: ['', '', '', '', '', '', ''], datasets: [{ data: last7, backgroundColor: color + '33', borderColor: color, borderWidth: 1, borderRadius: 3 }] },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false, min: 0 } } }
+                    });
+                }, 50);
+            });
+            if (!el.children.length) el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📊</div><div class="empty-text">No task data yet.</div></div>';
+        }
+
+        function renderDailyTrend() {
+            const labels = [], done = [], total = [];
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const ds = d.toISOString().split('T')[0];
+                labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                const t = store.tasks.filter(x => x.date === ds);
+                total.push(t.length); done.push(t.filter(x => x.done).length);
+            }
+            if (dailyTrendInst) dailyTrendInst.destroy();
+            dailyTrendInst = new Chart(document.getElementById('dailyTrendChart'), {
+                type: 'bar',
+                data: {
+                    labels, datasets: [
+                        { label: 'Total Tasks', data: total, backgroundColor: 'rgba(0,229,255,0.1)', borderColor: '#00e5ff', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Completed', data: done, backgroundColor: 'rgba(16,185,129,0.25)', borderColor: '#10b981', borderWidth: 1, borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne' } } } }, scales: { x: { ticks: { color: '#64748b', maxRotation: 45 }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } } } }
+            });
+        }
+
+        function renderPriorityAnalysis() {
+            const h = store.tasks.filter(t => t.priority === 'high'), m = store.tasks.filter(t => t.priority === 'medium'), l = store.tasks.filter(t => t.priority === 'low');
+            if (priorityBarInst) priorityBarInst.destroy();
+            priorityBarInst = new Chart(document.getElementById('priorityBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['High', 'Medium', 'Low'],
+                    datasets: [
+                        { label: 'Total', data: [h.length, m.length, l.length], backgroundColor: ['rgba(239,68,68,0.15)', 'rgba(245,158,11,0.15)', 'rgba(16,185,129,0.15)'], borderColor: ['#ef4444', '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6 },
+                        { label: 'Done', data: [h.filter(t => t.done).length, m.filter(t => t.done).length, l.filter(t => t.done).length], backgroundColor: ['rgba(239,68,68,0.4)', 'rgba(245,158,11,0.4)', 'rgba(16,185,129,0.4)'], borderColor: ['#ef4444', '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne' } } } }, scales: { x: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } } } }
+            });
+
+            const sum = document.getElementById('priority-summary');
+            [[h, '🔴 High', '#ef4444'], [m, '🟡 Medium', '#f59e0b'], [l, '🟢 Low', '#10b981']].forEach(([tasks, label, color]) => {
+                const pct = tasks.length ? Math.round(tasks.filter(t => t.done).length / tasks.length * 100) : 0;
+                sum.innerHTML += `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:13px;font-weight:700;">${label}</span>
+          <span style="font-family:'Space Mono',monospace;font-size:12px;color:${color}">${tasks.filter(t => t.done).length}/${tasks.length} done (${pct}%)</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+            });
+        }
+
+        function calcStreak() {
+            let streak = 0;
+            const d = new Date();
+            while (true) {
+                const ds = d.toISOString().split('T')[0];
+                if (store.tasks.some(t => t.date === ds && t.done)) { streak++; d.setDate(d.getDate() - 1); }
+                else break;
+            }
+            return streak;
+        }
+
+        // ============================================================
+        // MODAL HELPERS
+        // ============================================================
+        function openModal() {
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+        function closeModal(e) {
+            if (!e || e.target === document.getElementById('modal-overlay'))
+                document.getElementById('modal-overlay').style.display = 'none';
+        }
+        function selectColor(el, color) {
+            el.parentElement.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+            const input = el.parentElement.parentElement.querySelector('input[type="hidden"]');
+            if (input) input.value = color;
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function toast(msg) {
+            const t = document.createElement('div');
+            t.className = 'toast'; t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2000);
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('dt-date').value = today();
+            document.getElementById('task-date-filter').value = today();
+
+            // Sample data for demo
+            const demoSubjects = [
+                { id: 's1', name: 'Data Structures', code: 'CS301', color: '#00e5ff' },
+                { id: 's2', name: 'Thermodynamics', code: 'ME201', color: '#7c3aed' },
+                { id: 's3', name: 'Digital Circuits', code: 'EC101', color: '#10b981' },
+                { id: 's4', name: 'Engineering Math', code: 'MA101', color: '#f59e0b' },
+            ];
+            store.subjects = demoSubjects;
+
+            // Demo tasks
+            const subNames = ['Data Structures', 'Thermodynamics', 'Digital Circuits', 'Engineering Math', 'General'];
+            const priorities = ['high', 'medium', 'low'];
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const ds = d.toISOString().split('T')[0];
+                const count = Math.floor(Math.random() * 5) + 1;
+                for (let j = 0; j < count; j++) {
+                    const sub = subNames[Math.floor(Math.random() * subNames.length)];
+                    store.tasks.push({
+                        id: `${ds}-${j}`, title: `Study session ${j + 1} - ${sub}`, subject: sub,
+                        priority: priorities[Math.floor(Math.random() * 3)], date: ds,
+                        done: Math.random() > 0.35, notes: ''
+                    });
+                }
+            }
+
+            // Demo week goals
+            store.weekGoals = [
+                { id: 'wg1', title: 'Complete DSA Assignment', subject: 'Data Structures', total: 8, done: 5, color: '#00e5ff' },
+                { id: 'wg2', title: 'Revise Thermodynamics', subject: 'Thermodynamics', total: 6, done: 3, color: '#7c3aed' },
+                { id: 'wg3', title: 'Practice Circuit Problems', subject: 'Digital Circuits', total: 10, done: 7, color: '#10b981' },
+            ];
+
+            // Demo skills
+            store.skills = [
+                { id: 'sk1', name: 'Python', icon: '💻', category: 'Technical Skill', desc: 'Main programming language', level: 3 },
+                { id: 'sk2', name: 'MATLAB', icon: '🧮', category: 'Tool/Framework', desc: 'Engineering simulations', level: 2 },
+                { id: 'sk3', name: 'Guitar', icon: '🎵', category: 'Hobby', desc: '6 months of practice', level: 2 },
+                { id: 'sk4', name: 'Machine Learning', icon: '🤖', category: 'Favorite Subject', desc: 'Deep learning enthusiast', level: 2 },
+            ];
+
+            updateSubjectDropdowns();
+            renderDashboard();
+            renderMonthPlanner();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
