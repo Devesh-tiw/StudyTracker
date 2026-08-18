@@ -40,7 +40,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated grid background */
         body::before {
             content: '';
             position: fixed;
@@ -53,7 +52,6 @@
             z-index: 0;
         }
 
-        /* SIDEBAR */
         .sidebar {
             position: fixed;
             left: 0;
@@ -131,7 +129,6 @@
             opacity: 1;
         }
 
-        /* MAIN */
         .main {
             margin-left: 72px;
             min-height: 100vh;
@@ -148,7 +145,6 @@
             display: block;
         }
 
-        /* PAGE HEADER */
         .page-header {
             display: flex;
             align-items: flex-end;
@@ -184,7 +180,6 @@
             border-radius: 4px;
         }
 
-        /* CARDS */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -229,7 +224,6 @@
             background: var(--border);
         }
 
-        /* GRID LAYOUTS */
         .grid-4 {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -254,7 +248,6 @@
             gap: 20px;
         }
 
-        /* STAT CARD */
         .stat-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -290,7 +283,6 @@
             opacity: 0.3;
         }
 
-        /* INPUT STYLES */
         .input-row {
             display: flex;
             gap: 10px;
@@ -334,7 +326,6 @@
             min-height: 80px;
         }
 
-        /* BUTTONS */
         .btn {
             padding: 10px 20px;
             border-radius: 8px;
@@ -394,7 +385,19 @@
             justify-content: center;
         }
 
-        /* TASK ITEMS */
+        .btn-reset {
+            background: transparent;
+            border: 1px solid var(--accent5);
+            color: var(--accent5);
+            font-size: 11px;
+            padding: 6px 14px;
+        }
+
+        .btn-reset:hover {
+            background: var(--accent5);
+            color: white;
+        }
+
         .task-item {
             display: flex;
             align-items: center;
@@ -474,7 +477,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* PRIORITY COLORS */
         .priority-high {
             background: rgba(239, 68, 68, 0.15);
             color: #ef4444;
@@ -490,7 +492,6 @@
             color: #10b981;
         }
 
-        /* PROGRESS BAR */
         .progress-bar {
             height: 6px;
             background: var(--surface2);
@@ -524,7 +525,6 @@
             }
         }
 
-        /* WEEK GOAL */
         .week-goal {
             background: var(--surface2);
             border: 1px solid var(--border);
@@ -557,7 +557,6 @@
             color: var(--accent2);
         }
 
-        /* MONTH CALENDAR */
         .month-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -616,7 +615,6 @@
             background: var(--accent2);
         }
 
-        /* SUBJECT CARDS */
         .subject-card {
             background: var(--surface2);
             border: 1px solid var(--border);
@@ -654,13 +652,11 @@
             margin-bottom: 16px;
         }
 
-        /* CHART CONTAINERS */
         .chart-wrap {
             position: relative;
             width: 100%;
         }
 
-        /* MODAL */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -730,7 +726,6 @@
             margin-top: 20px;
         }
 
-        /* COLOR SWATCHES */
         .color-swatches {
             display: flex;
             gap: 8px;
@@ -752,7 +747,6 @@
             border-color: white;
         }
 
-        /* REPORT TAB */
         .tab-row {
             display: flex;
             gap: 8px;
@@ -779,7 +773,6 @@
             background: rgba(0, 229, 255, 0.08);
         }
 
-        /* EMPTY STATE */
         .empty {
             text-align: center;
             padding: 48px 24px;
@@ -795,7 +788,6 @@
             font-size: 14px;
         }
 
-        /* SCROLLBAR */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -814,7 +806,6 @@
             background: var(--text-dim);
         }
 
-        /* TOAST */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -842,7 +833,6 @@
             }
         }
 
-        /* SKILL BADGES */
         .skill-card {
             background: var(--surface2);
             border: 1px solid var(--border);
@@ -884,40 +874,12 @@
             border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
-        /* MONTH PLAN MODAL */
         .plan-dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
         }
 
-        /* RESPONSIVE */
-        @media (max-width: 900px) {
-            .grid-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .grid-3 {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .page {
-                padding: 16px;
-            }
-
-            .grid-4,
-            .grid-3 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* WEEK PLANNER */
         .week-day-col {
             background: var(--surface2);
             border: 1px solid var(--border);
@@ -951,6 +913,31 @@
             background: var(--surface);
             border-left: 2px solid var(--accent);
             cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .page {
+                padding: 16px;
+            }
+
+            .grid-4,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -1000,7 +987,10 @@
                     <div class="page-title">Study<span>Core</span></div>
                     <div class="page-subtitle">// engineering study tracker</div>
                 </div>
-                <div class="date-badge" id="today-date"></div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button class="btn btn-reset" onclick="resetAllData()">🗑 Reset All Data</button>
+                    <div class="date-badge" id="today-date"></div>
+                </div>
             </div>
 
             <div class="grid-4" style="margin-bottom:20px;">
@@ -1044,7 +1034,8 @@
             <div class="card">
                 <div class="card-title">⚡ Today's Quick Add</div>
                 <div class="input-row">
-                    <input type="text" id="quick-task" placeholder="Add a quick task for today...">
+                    <input type="text" id="quick-task" placeholder="Add a quick task for today..."
+                        onkeydown="if(event.key==='Enter')quickAddTask()">
                     <select id="quick-subject">
                         <option value="General">General</option>
                     </select>
@@ -1075,8 +1066,8 @@
                         <div class="card-title">➕ New Task</div>
                         <div class="modal-row">
                             <div class="modal-label">TASK TITLE</div>
-                            <input type="text" id="dt-title" placeholder="What do you need to study?"
-                                style="width:100%">
+                            <input type="text" id="dt-title" placeholder="What do you need to study?" style="width:100%"
+                                onkeydown="if(event.key==='Enter')addDayTask()">
                         </div>
                         <div class="modal-row">
                             <div class="modal-label">SUBJECT</div>
@@ -1356,15 +1347,17 @@
 
     <!-- MODALS -->
     <div id="modal-overlay" style="display:none;" class="modal-overlay" onclick="closeModal(event)">
-        <div class="modal" id="modal-content" onclick="e=>e.stopPropagation()">
+        <div class="modal" id="modal-content" onclick="event.stopPropagation()">
             <div id="modal-body"></div>
         </div>
     </div>
 
     <script>
         // ============================================================
-        // DATA STORE
+        // DATA STORE — starts empty, persists via localStorage
         // ============================================================
+        const STORAGE_KEY = 'studycore_data';
+
         let store = {
             tasks: [],
             weekGoals: [],
@@ -1377,7 +1370,41 @@
         let selectedDay = null;
         const COLORS = ['#00e5ff', '#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#8b5cf6', '#06b6d4', '#84cc16'];
 
-        function save() { /* in-memory only */ }
+        // ============================================================
+        // PERSISTENCE — localStorage
+        // ============================================================
+        function save() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+            } catch (e) {
+                console.warn('Could not save to localStorage:', e);
+            }
+        }
+
+        function load() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    store.tasks = parsed.tasks || [];
+                    store.weekGoals = parsed.weekGoals || [];
+                    store.monthPlans = parsed.monthPlans || {};
+                    store.subjects = parsed.subjects || [];
+                    store.skills = parsed.skills || [];
+                }
+            } catch (e) {
+                console.warn('Could not load from localStorage:', e);
+            }
+        }
+
+        function resetAllData() {
+            if (!confirm('⚠️ Are you sure you want to delete ALL your data? This cannot be undone!')) return;
+            store = { tasks: [], weekGoals: [], monthPlans: {}, subjects: [], skills: [] };
+            save();
+            updateSubjectDropdowns();
+            renderDashboard();
+            toast('All data has been reset.');
+        }
 
         // ============================================================
         // NAVIGATION
@@ -1420,10 +1447,8 @@
             document.getElementById('stat-subjects').textContent = store.subjects.length;
             document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-            // Quick task list
             renderQuickTaskList();
 
-            // Weekly chart (last 7 days)
             const days = [], totals = [], completeds = [];
             for (let i = 6; i >= 0; i--) {
                 const d = new Date(); d.setDate(d.getDate() - i);
@@ -1447,17 +1472,14 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne' } } } }, scales: { x: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } } } }
             });
 
-            // Subject donut
             const subjectCounts = {};
             store.tasks.forEach(t => { subjectCounts[t.subject] = (subjectCounts[t.subject] || 0) + 1; });
             const labels = Object.keys(subjectCounts), data = Object.values(subjectCounts);
             const bgs = labels.map((_, i) => COLORS[i % COLORS.length]);
 
             if (subjectDonutInst) subjectDonutInst.destroy();
-            if (labels.length === 0) {
-                if (subjectDonutInst) subjectDonutInst.destroy();
-                return;
-            }
+            subjectDonutInst = null;
+            if (labels.length === 0) return;
             subjectDonutInst = new Chart(document.getElementById('subjectDonut'), {
                 type: 'doughnut',
                 data: { labels, datasets: [{ data, backgroundColor: bgs.map(c => c + '55'), borderColor: bgs, borderWidth: 2 }] },
@@ -1469,7 +1491,7 @@
             const todayStr = today();
             const tasks = store.tasks.filter(t => t.date === todayStr);
             const el = document.getElementById('quick-task-list');
-            if (!tasks.length) { el.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px 0;">No tasks for today yet.</div>'; return; }
+            if (!tasks.length) { el.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:12px 0;">No tasks for today yet. Add your first task above!</div>'; return; }
             el.innerHTML = tasks.slice(0, 5).map(t => `
     <div class="task-item ${t.done ? 'done' : ''}">
       <div class="task-check ${t.done ? 'checked' : ''}" onclick="toggleTask('${t.id}')">
@@ -1484,7 +1506,7 @@
 
         function quickAddTask() {
             const title = document.getElementById('quick-task').value.trim();
-            if (!title) return;
+            if (!title) return toast('Please enter a task!');
             const task = {
                 id: Date.now().toString(),
                 title,
@@ -1495,6 +1517,7 @@
                 notes: ''
             };
             store.tasks.push(task);
+            save();
             document.getElementById('quick-task').value = '';
             renderDashboard();
             toast('Task added!');
@@ -1519,7 +1542,6 @@
             document.getElementById('day-completion-pct').textContent = pct + '%';
             document.getElementById('day-progress-fill').style.width = pct + '%';
 
-            // Priority chart
             const high = tasks.filter(t => t.priority === 'high');
             const mid = tasks.filter(t => t.priority === 'medium');
             const low = tasks.filter(t => t.priority === 'low');
@@ -1541,7 +1563,7 @@
 
             const el = document.getElementById('day-task-list');
             if (!tasks.length) {
-                el.innerHTML = '<div class="empty"><div class="empty-icon">📚</div><div class="empty-text">No tasks for this day.</div></div>';
+                el.innerHTML = '<div class="empty"><div class="empty-icon">📚</div><div class="empty-text">No tasks for this day. Add one using the form!</div></div>';
                 return;
             }
 
@@ -1578,6 +1600,7 @@
                 notes: document.getElementById('dt-notes').value.trim()
             };
             store.tasks.push(task);
+            save();
             document.getElementById('dt-title').value = '';
             document.getElementById('dt-notes').value = '';
             renderDayTasks();
@@ -1586,11 +1609,17 @@
 
         function toggleTask(id) {
             const t = store.tasks.find(x => x.id === id);
-            if (t) { t.done = !t.done; renderDayTasks(); renderQuickTaskList(); }
+            if (t) {
+                t.done = !t.done;
+                save();
+                renderDayTasks();
+                renderQuickTaskList();
+            }
         }
 
         function deleteTask(id) {
             store.tasks = store.tasks.filter(x => x.id !== id);
+            save();
             renderDayTasks();
             toast('Task removed.');
         }
@@ -1601,7 +1630,6 @@
         let weekGoalChartInst;
 
         function renderWeekGoals() {
-            // Week day mini view
             const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
             const now = new Date();
             const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
@@ -1616,13 +1644,13 @@
                 el.innerHTML = `<div class="week-day-name">${d}<br><span style="font-size:9px;font-weight:400;">${dayDate.getDate()}</span></div>
       ${dayTasks.slice(0, 4).map(t => `<div class="mini-task" title="${t.title}">${t.title.substring(0, 12)}${t.title.length > 12 ? '…' : ''}</div>`).join('')}
       ${dayTasks.length > 4 ? `<div style="font-size:9px;color:var(--text-dim);padding:2px 4px;">+${dayTasks.length - 4} more</div>` : ''}
+      ${dayTasks.length === 0 ? `<div style="font-size:9px;color:var(--text-dim);padding:2px 4px;opacity:0.5;">No tasks</div>` : ''}
     `;
             });
 
-            // Week goals list
             const el = document.getElementById('week-goal-list');
             if (!store.weekGoals.length) {
-                el.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">No weekly goals. Add one!</div></div>';
+                el.innerHTML = '<div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">No weekly goals yet. Click "+ New Goal" to get started!</div></div>';
             } else {
                 el.innerHTML = store.weekGoals.map(g => {
                     const pct = Math.min(100, Math.round((g.done / Math.max(1, g.total)) * 100));
@@ -1645,8 +1673,8 @@
                 }).join('');
             }
 
-            // Chart
             if (weekGoalChartInst) weekGoalChartInst.destroy();
+            weekGoalChartInst = null;
             if (!store.weekGoals.length) return;
             weekGoalChartInst = new Chart(document.getElementById('weekGoalChart'), {
                 type: 'bar',
@@ -1692,14 +1720,15 @@
                 done: 0,
                 color: document.getElementById('wg-color').value
             });
+            save();
             closeModal();
             renderWeekGoals();
             toast('Goal added!');
         }
 
-        function incrementGoal(id) { const g = store.weekGoals.find(x => x.id === id); if (g && g.done < g.total) { g.done++; renderWeekGoals(); } }
-        function decrementGoal(id) { const g = store.weekGoals.find(x => x.id === id); if (g && g.done > 0) { g.done--; renderWeekGoals(); } }
-        function deleteWeekGoal(id) { store.weekGoals = store.weekGoals.filter(x => x.id !== id); renderWeekGoals(); toast('Goal removed.'); }
+        function incrementGoal(id) { const g = store.weekGoals.find(x => x.id === id); if (g && g.done < g.total) { g.done++; save(); renderWeekGoals(); } }
+        function decrementGoal(id) { const g = store.weekGoals.find(x => x.id === id); if (g && g.done > 0) { g.done--; save(); renderWeekGoals(); } }
+        function deleteWeekGoal(id) { store.weekGoals = store.weekGoals.filter(x => x.id !== id); save(); renderWeekGoals(); toast('Goal removed.'); }
 
         // ============================================================
         // MONTH PLANNER
@@ -1750,7 +1779,7 @@
 
             document.getElementById('modal-body').innerHTML = `
     <div class="modal-title">📅 ${fmtDate(ds)}</div>
-    <div id="day-plans-existing">${existing || '<div style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">No plans yet.</div>'}</div>
+    <div id="day-plans-existing">${existing || '<div style="color:var(--text-dim);font-size:12px;margin-bottom:12px;">No plans yet for this day.</div>'}</div>
     <div class="modal-row"><div class="modal-label">ADD PLAN</div><input type="text" id="plan-text" placeholder="e.g. Study Thermodynamics Ch.3" style="width:100%"></div>
     <div style="display:flex;gap:10px;margin-bottom:12px;">
       <select id="plan-tag" style="flex:1">
@@ -1776,15 +1805,17 @@
             if (!text) return toast('Enter a plan!');
             if (!store.monthPlans[ds]) store.monthPlans[ds] = [];
             store.monthPlans[ds].push({ id: Date.now().toString(), text, tag: document.getElementById('plan-tag').value, color: document.getElementById('plan-color').value });
+            save();
             document.getElementById('plan-text').value = '';
             renderMonthPlanner();
             toast('Plan added!');
-            // Re-render modal content
             openDayPlanModal(ds);
         }
 
         function removePlan(ds, id) {
             store.monthPlans[ds] = (store.monthPlans[ds] || []).filter(p => p.id !== id);
+            if (store.monthPlans[ds].length === 0) delete store.monthPlans[ds];
+            save();
             renderMonthPlanner();
             openDayPlanModal(ds);
         }
@@ -1796,7 +1827,7 @@
                 plans.forEach(p => allPlans.push({ ...p, date: d }));
             });
             allPlans.sort((a, b) => a.date.localeCompare(b.date));
-            if (!allPlans.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Click a day to add a plan</div></div>'; return; }
+            if (!allPlans.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Click a day on the calendar to add a plan</div></div>'; return; }
             el.innerHTML = allPlans.map(p => `
     <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;border-left:3px solid ${p.color};">
       <div>
@@ -1832,7 +1863,7 @@
         function renderSubjects() {
             const el = document.getElementById('subject-grid');
             if (!store.subjects.length) {
-                el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📘</div><div class="empty-text">No subjects. Add your engineering subjects!</div></div>';
+                el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📘</div><div class="empty-text">No subjects added yet. Click "+ Add Subject" to get started!</div></div>';
                 return;
             }
             el.innerHTML = store.subjects.map(s => {
@@ -1862,7 +1893,6 @@
       </div>`;
             }).join('');
 
-            // Mini charts per subject
             store.subjects.forEach(s => {
                 const tasks = store.tasks.filter(t => t.subject === s.name);
                 const last7 = [];
@@ -1903,6 +1933,7 @@
             if (!name) return toast('Enter a subject name!');
             if (store.subjects.find(s => s.name === name)) return toast('Subject already exists!');
             store.subjects.push({ id: Date.now().toString(), name, code: document.getElementById('sub-code').value.trim() || '—', color: document.getElementById('sub-color').value });
+            save();
             closeModal();
             updateSubjectDropdowns();
             renderSubjects();
@@ -1910,7 +1941,10 @@
         }
 
         function deleteSubject(id) {
+            const subj = store.subjects.find(x => x.id === id);
+            if (subj && !confirm(`Delete "${subj.name}"? Tasks tagged with this subject will keep their tag.`)) return;
             store.subjects = store.subjects.filter(x => x.id !== id);
+            save();
             updateSubjectDropdowns();
             renderSubjects();
             toast('Subject removed.');
@@ -1918,8 +1952,10 @@
 
         function updateSubjectDropdowns() {
             const opts = ['<option value="General">General</option>', ...store.subjects.map(s => `<option value="${s.name}">${s.name}</option>`)].join('');
-            ['quick-subject', 'dt-subject', 'dt-subject'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
-            document.querySelectorAll('[id^="dt-subject"],[id^="quick-subject"]').forEach(el => el.innerHTML = opts);
+            ['quick-subject', 'dt-subject'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = opts;
+            });
         }
 
         // ============================================================
@@ -1928,10 +1964,9 @@
         let skillRadarInst;
 
         function renderSkills() {
-            // Skill list
             const listEl = document.getElementById('skill-list');
             if (!store.skills.length) {
-                listEl.innerHTML = '<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">Add skills, hobbies, or favorite topics!</div></div>';
+                listEl.innerHTML = '<div class="empty"><div class="empty-icon">⚡</div><div class="empty-text">No skills added yet. Click "+ Add Skill" to track your abilities!</div></div>';
             } else {
                 listEl.innerHTML = store.skills.map(sk => `
       <div class="skill-card">
@@ -1945,9 +1980,8 @@
       </div>`).join('');
             }
 
-            // Progress list
             const progEl = document.getElementById('skill-progress-list');
-            if (!store.skills.length) { progEl.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">Add skills to see progress</div>'; return; }
+            if (!store.skills.length) { progEl.innerHTML = '<div style="color:var(--text-dim);font-size:12px;text-align:center;padding:20px;">Add skills to see progress here</div>'; return; }
             progEl.innerHTML = store.skills.map(sk => {
                 const pct = [25, 50, 75, 100][sk.level - 1] || 25;
                 return `
@@ -1960,8 +1994,8 @@
       </div>`;
             }).join('');
 
-            // Radar chart
             if (skillRadarInst) skillRadarInst.destroy();
+            skillRadarInst = null;
             if (store.skills.length < 3) return;
             skillRadarInst = new Chart(document.getElementById('skillRadar'), {
                 type: 'radar',
@@ -2013,17 +2047,23 @@
             const name = document.getElementById('sk-name').value.trim();
             if (!name) return toast('Enter a skill name!');
             store.skills.push({ id: Date.now().toString(), name, icon: document.getElementById('sk-icon').value, category: document.getElementById('sk-cat').value, desc: document.getElementById('sk-desc').value.trim(), level: parseInt(document.getElementById('sk-level').value) || 1 });
+            save();
             closeModal();
             renderSkills();
             toast('Skill added!');
         }
 
-        function deleteSkill(id) { store.skills = store.skills.filter(x => x.id !== id); renderSkills(); }
+        function deleteSkill(id) {
+            store.skills = store.skills.filter(x => x.id !== id);
+            save();
+            renderSkills();
+            toast('Skill removed.');
+        }
 
         // ============================================================
         // REPORTS
         // ============================================================
-        let reportLineInst, reportDonutInst, dailyTrendInst, priorityBarInst, subjectReportCharts = [];
+        let reportLineInst, reportDonutInst, dailyTrendInst, priorityBarInst;
 
         function renderReports() {
             const total = store.tasks.length, done = store.tasks.filter(t => t.done).length;
@@ -2032,7 +2072,6 @@
             document.getElementById('r-rate').textContent = total ? Math.round(done / total * 100) + '%' : '0%';
             document.getElementById('r-streak').textContent = calcStreak();
 
-            // Line chart – last 14 days
             const lLabels = [], lDone = [], lTotal = [];
             for (let i = 13; i >= 0; i--) {
                 const d = new Date(); d.setDate(d.getDate() - i);
@@ -2054,10 +2093,10 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Syne' } } } }, scales: { x: { ticks: { color: '#64748b', maxRotation: 45 }, grid: { color: '#1e2d4a' } }, y: { ticks: { color: '#64748b' }, grid: { color: '#1e2d4a' } } } }
             });
 
-            // Subject donut
             const sc = {};
             store.tasks.filter(t => t.done).forEach(t => { sc[t.subject] = (sc[t.subject] || 0) + 1; });
             if (reportDonutInst) reportDonutInst.destroy();
+            reportDonutInst = null;
             const scK = Object.keys(sc), scV = Object.values(sc);
             if (scK.length) {
                 reportDonutInst = new Chart(document.getElementById('reportDonutChart'), {
@@ -2119,7 +2158,7 @@
                     });
                 }, 50);
             });
-            if (!el.children.length) el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📊</div><div class="empty-text">No task data yet.</div></div>';
+            if (!el.children.length) el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">📊</div><div class="empty-text">No task data yet. Add tasks to see subject-wise reports!</div></div>';
         }
 
         function renderDailyTrend() {
@@ -2160,6 +2199,7 @@
             });
 
             const sum = document.getElementById('priority-summary');
+            sum.innerHTML = '';
             [[h, '🔴 High', '#ef4444'], [m, '🟡 Medium', '#f59e0b'], [l, '🟢 Low', '#10b981']].forEach(([tasks, label, color]) => {
                 const pct = tasks.length ? Math.round(tasks.filter(t => t.done).length / tasks.length * 100) : 0;
                 sum.innerHTML += `
@@ -2212,55 +2252,20 @@
         }
 
         // ============================================================
-        // INIT
+        // INIT — Clean start, load from localStorage if available
         // ============================================================
         function init() {
+            // Load saved data from localStorage (empty if first visit)
+            load();
+
             document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
             document.getElementById('dt-date').value = today();
             document.getElementById('task-date-filter').value = today();
 
-            // Sample data for demo
-            const demoSubjects = [
-                { id: 's1', name: 'Data Structures', code: 'CS301', color: '#00e5ff' },
-                { id: 's2', name: 'Thermodynamics', code: 'ME201', color: '#7c3aed' },
-                { id: 's3', name: 'Digital Circuits', code: 'EC101', color: '#10b981' },
-                { id: 's4', name: 'Engineering Math', code: 'MA101', color: '#f59e0b' },
-            ];
-            store.subjects = demoSubjects;
-
-            // Demo tasks
-            const subNames = ['Data Structures', 'Thermodynamics', 'Digital Circuits', 'Engineering Math', 'General'];
-            const priorities = ['high', 'medium', 'low'];
-            for (let i = 13; i >= 0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const ds = d.toISOString().split('T')[0];
-                const count = Math.floor(Math.random() * 5) + 1;
-                for (let j = 0; j < count; j++) {
-                    const sub = subNames[Math.floor(Math.random() * subNames.length)];
-                    store.tasks.push({
-                        id: `${ds}-${j}`, title: `Study session ${j + 1} - ${sub}`, subject: sub,
-                        priority: priorities[Math.floor(Math.random() * 3)], date: ds,
-                        done: Math.random() > 0.35, notes: ''
-                    });
-                }
-            }
-
-            // Demo week goals
-            store.weekGoals = [
-                { id: 'wg1', title: 'Complete DSA Assignment', subject: 'Data Structures', total: 8, done: 5, color: '#00e5ff' },
-                { id: 'wg2', title: 'Revise Thermodynamics', subject: 'Thermodynamics', total: 6, done: 3, color: '#7c3aed' },
-                { id: 'wg3', title: 'Practice Circuit Problems', subject: 'Digital Circuits', total: 10, done: 7, color: '#10b981' },
-            ];
-
-            // Demo skills
-            store.skills = [
-                { id: 'sk1', name: 'Python', icon: '💻', category: 'Technical Skill', desc: 'Main programming language', level: 3 },
-                { id: 'sk2', name: 'MATLAB', icon: '🧮', category: 'Tool/Framework', desc: 'Engineering simulations', level: 2 },
-                { id: 'sk3', name: 'Guitar', icon: '🎵', category: 'Hobby', desc: '6 months of practice', level: 2 },
-                { id: 'sk4', name: 'Machine Learning', icon: '🤖', category: 'Favorite Subject', desc: 'Deep learning enthusiast', level: 2 },
-            ];
-
+            // Populate subject dropdowns from saved data
             updateSubjectDropdowns();
+
+            // Render the dashboard (all empty on first visit)
             renderDashboard();
             renderMonthPlanner();
         }
