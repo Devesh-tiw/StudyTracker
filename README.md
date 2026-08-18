@@ -1,104 +1,209 @@
-# ⬡ StudyCore — Engineering Study Tracker
+<div align="center">
 
-![StudyCore Banner](S1.png)
+# ⬡ StudyCore
 
-**A sleek, modern, and powerful offline study companion built for engineering students.**
+### **The Ultimate Engineering Study Tracker**
 
-StudyCore helps you stay organized and consistent with daily tasks, weekly goals, monthly planning, subject management, skill tracking, and comprehensive performance reports — all in a beautiful cyber-tech interface.
+*A sleek, dark-themed, fully client-side study management dashboard built for engineering students who want to take control of their academic life.*
 
-Completely private. Fully offline. Data saved automatically in your browser using `localStorage`.
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 
----
+[![License: MIT](https://img.shields.io/badge/License-MIT-00e5ff.svg?style=for-the-badge)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-7c3aed.svg?style=for-the-badge)](CONTRIBUTING.md)
+[![Maintenance](https://img.shields.io/badge/Maintained-Yes-10b981.svg?style=for-the-badge)](https://github.com/yourusername/studycore)
 
-## ✨ Key Features
+<br/>
 
-### Core Tools
-- **Dashboard** — Real-time statistics, weekly progress chart, subject distribution, and quick task adder
-- **Day Tasks** — Add, prioritize, track, and complete daily study tasks with notes
-- **Week Goals** — Set measurable weekly objectives with progress tracking and mini calendar view
-- **Month Planner** — Interactive calendar with day planning, visual indicators, and monthly task distribution
-- **Subjects** — Manage all your engineering courses with color coding, progress tracking, and mini charts
-- **Skills & Extras** — Track technical skills, hobbies, and favorite topics with levels, radar chart, and progress bars
-- **Reports** — Deep analytics including:
-  - Overview (streaks, completion rate, trends)
-  - Subject-wise performance
-  - Daily trend analysis
-  - Priority breakdown
+[**🚀 Live Demo**](https://yourusername.github.io/studycore) · [**🐛 Report Bug**](https://github.com/yourusername/studycore/issues) · [**💡 Request Feature**](https://github.com/yourusername/studycore/issues)
 
-### Design & Experience
-- Stunning dark cyber-tech aesthetic with neon accents and animated grid background
-- Fully responsive (desktop + mobile friendly)
-- Smooth animations, modals, toast notifications
-- Keyboard support (Enter to submit tasks)
-- Clean empty states with helpful guidance
-- **Reset All Data** button with confirmation
+<br/>
+
+<img src="https://raw.githubusercontent.com/yourusername/studycore/main/screenshots/dashboard.png" alt="StudyCore Dashboard" width="90%"/>
+
+</div>
 
 ---
 
-## 🚀 Quick Start
+## 📋 Table of Contents
 
-1. Download the `index.html` file
-2. Open it in any modern browser (**Chrome/Edge recommended**)
-3. Start by adding your **Subjects** first
-4. Begin adding tasks, goals, and skills
-
-> **All your data is automatically saved** in the browser. Clearing browser cache will reset the app.
-
-### Host Online (Recommended)
-
-You can host it for free on:
-- **GitHub Pages**
-- **Vercel**
-- **Netlify**
-- **Cloudflare Pages**
-
-Just upload the single `index.html` file. Perfect for accessing from multiple devices.
+- [About](#-about)
+- [Features](#-features)
+- [Screenshots](#-screenshots)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Usage Guide](#-usage-guide)
+- [Project Structure](#-project-structure)
+- [Keyboard Shortcuts](#-keyboard-shortcuts)
+- [Data & Privacy](#-data--privacy)
+- [Browser Support](#-browser-support)
+- [Contributing](#-contributing)
+- [Roadmap](#-roadmap)
+- [License](#-license)
+- [Acknowledgments](#-acknowledgments)
 
 ---
 
-## 🛠 Tech Stack
+## 🎯 About
 
-- **HTML5**, **CSS3** (Custom properties, Grid, Flexbox, Keyframe animations)
-- **Vanilla JavaScript** (No frameworks)
-- **Chart.js v4** — All charts and visualizations
-- **localStorage** — Data persistence
-- **Google Fonts** — Syne + Space Mono
+**StudyCore** is a comprehensive, zero-dependency study management dashboard designed specifically for **engineering students**. It provides a beautiful, distraction-free interface to plan daily tasks, set weekly goals, manage monthly schedules, track subjects, and analyze your study performance — all from a single HTML file.
+
+### ❓ Why StudyCore?
+
+| Problem | StudyCore Solution |
+|---|---|
+| 🔴 Scattered study plans across notebooks & apps | ✅ One unified dashboard for everything |
+| 🔴 No visibility into study patterns | ✅ Rich charts & analytics show your progress |
+| 🔴 Cloud-dependent tools need accounts & internet | ✅ 100% offline, no account needed |
+| 🔴 Complex tools with steep learning curves | ✅ Clean UI, zero setup, instant start |
+| 🔴 Privacy concerns with cloud storage | ✅ All data stays on YOUR device |
+
+---
+
+## ✨ Features
+
+### 📊 Dashboard
+> Your command center — see everything at a glance
+- **Real-time stats**: Today's tasks, completion count, weekly goals, total subjects
+- **Weekly progress chart**: Bar chart showing tasks created vs completed over the last 7 days
+- **Subject distribution**: Doughnut chart breaking down tasks by subject
+- **Quick Add**: Instantly add tasks without leaving the dashboard
+
+### ◈ Day Tasks
+> Plan, track, and conquer your daily workload
+- Create tasks with **title, subject, priority, date, and notes**
+- **Three priority levels**: 🔴 High, 🟡 Medium, 🟢 Low
+- **Completion tracking** with visual progress bar
+- **Priority distribution** doughnut chart
+- Filter tasks by any date
+- One-click toggle to mark tasks done/undone
+
+### ◉ Week Goals
+> Set ambitious weekly targets and track your progress
+- Create goals with **custom targets** (e.g., "Complete 10 DSA problems")
+- **+1 / -1 controls** for quick progress updates
+- **Weekly calendar view** showing tasks per day
+- **Horizontal bar chart** comparing targets vs progress
+- Color-coded goals for visual organization
+
+### ▦ Month Planner
+> Bird's-eye view of your entire month
+- **Interactive calendar** with day-click planning
+- Add plans with **custom tags**: Study, Exam, Assignment, Lab, Project, Revision
+- **Color-coded dots** indicate days with plans or tasks
+- **Monthly task distribution** bar chart
+- Navigate between months with Previous/Next controls
+- Chronological plan list with tag badges
+
+### ◫ Subjects
+> Organize your engineering curriculum
+- Add subjects with **name, code, and custom color**
+- Per-subject **completion percentage** with progress bars
+- **7-day activity sparkline** for each subject
+- Visual cards with hover animations
+- Subjects auto-populate in all task dropdowns
+
+### ◆ Skills & Extras
+> Track what makes you unique beyond academics
+- Track skills with **custom icons** (💻🔬🧮🎨🎵 and more)
+- **Four skill levels**: Beginner → Intermediate → Advanced → Expert
+- **Categories**: Technical Skill, Favorite Subject, Hobby, Language, Tool/Framework
+- **Radar chart** visualizing skill distribution (3+ skills)
+- **Progress bars** showing mastery level per skill
+
+### ◬ Reports & Analytics
+> Deep dive into your study patterns
+- **4 report tabs**: Overview, By Subject, Daily Trend, Priority Analysis
+- **Overview**: Total tasks, completed count, completion rate, day streak
+- **By Subject**: Per-subject cards with stats and mini charts
+- **Daily Trend**: 14-day bar chart of task activity
+- **Priority Analysis**: Breakdown by priority with completion rates
+
+### 🛡️ Data Management
+- **Auto-save** to localStorage — data persists across sessions
+- **Reset All Data** button with confirmation prompt
+- **Delete confirmations** for important actions
+- **Zero data leaves your device** — complete privacy
 
 ---
 
 ## 📸 Screenshots
 
-*(Replace these with actual screenshots after you take them)*
+<div align="center">
 
-**Dashboard** | **Day Tasks** | **Month Planner** | **Reports**
----|---|---|---
-![Dashboard](screenshot-dashboard.png) | ![Day Tasks](screenshot-daytasks.png) | ![Month Planner](screenshot-month.png) | ![Reports](screenshot-reports.png)
+| Dashboard | Day Tasks |
+|---|---|
+| ![Dashboard](screenshots/dashboard.png) | ![Day Tasks](screenshots/daytasks.png) |
 
----
+| Week Goals | Month Planner |
+|---|---|
+| ![Week Goals](screenshots/weekgoals.png) | ![Month Planner](screenshots/monthplan.png) |
 
-## 🎯 Perfect For
+| Subjects | Skills & Extras |
+|---|---|
+| ![Subjects](screenshots/subjects.png) | ![Skills](screenshots/skills.png) |
 
-- Computer Science, Software, Mechanical, Electrical, Civil, and other engineering students
-- Self-taught developers and technical learners
-- Anyone who wants a clean, private, and beautiful academic productivity tool
+| Reports - Overview | Reports - Priority |
+|---|---|
+| ![Reports](screenshots/reports.png) | ![Priority](screenshots/priority.png) |
 
----
-
-## 🔮 Future Roadmap
-
-- [ ] Export / Import data (JSON & CSV)
-- [ ] Pomodoro timer integration
-- [ ] Installable PWA (Progressive Web App)
-- [ ] Light mode toggle
-- [ ] Multiple profile / semester support
-- [ ] AI-powered study suggestions (future)
+</div>
 
 ---
 
-## ❤️ Made With Passion
+## 🛠 Tech Stack
 
-Built for engineering students who want to **study smarter**, not harder.
+| Technology | Purpose |
+|---|---|
+| **HTML5** | Semantic structure & layout |
+| **CSS3** | Custom properties, Grid, Flexbox, animations |
+| **Vanilla JavaScript** | All logic, state management, DOM manipulation |
+| **Chart.js 4.4.1** | Bar, Line, Doughnut, Radar charts |
+| **Google Fonts** | Syne (headings) + Space Mono (data) |
+| **localStorage API** | Client-side data persistence |
 
-If you like this project, please give it a ⭐ on GitHub!
+### 🏗 Architecture
+========================================================================================
+                                     STUDYCORE APP                                      
+========================================================================================
+[  SIDEBAR (NAV) AREA  ] | [                    MAIN CONTENT REGION                    ]
+------------------------+---------------------------------------------------------------
+                         | [ PAGE HEADER ] --> [ ⬡ Dash ]
+                         |--------------------------------------------------------------
 
-**Made by Devesh Tiwari ** • August 2026
+                         | [ ◈ Tasks ] | [ ◉ Goals ] | [ DYNAMIC CONTENT ]
+                         |             |             |----------------------------------
+                         |             |             | [ 🗓️ Month ]
+                         |             |             | [ 📖 Subj ]
+                         |             |             | [ (Cards, Charts, Forms, Lists) ]
+                         |             |             | [ ◆ Skill ]
+                         |             |             | [ ⚠️ Report ]
+========================================================================================
+                                DATA & RENDER PIPELINE                                  
+========================================================================================
+[ [ ] localStorage ] <=======> [ store{} State Management ] -------> [ render() Engine ]
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- A modern web browser (Chrome, Firefox, Edge, Safari)
+- That's it. Seriously. 🎉
+
+### Installation
+
+**Option 1 — Direct Download**
+```bash
+# Clone the repository
+git clone https://github.com/devesh-tiw/StudyTracker.git
+
+# Navigate to the project
+cd studycore
+
+# Open in your browser
+open index.html
+# or simply double-click the index.html file
