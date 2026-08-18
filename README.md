@@ -1,6 +1,6 @@
 # ⬡ StudyCore — Engineering Study Tracker
 
-![StudyCore Banner](https://via.placeholder.com/1200x400/080c14/00e5ff?text=STUDYCORE+—+ENGINEERING+STUDY+TRACKER)
+![StudyCore Banner](S1.png)
 
 **A sleek, modern, and powerful offline study companion built for engineering students.**
 
