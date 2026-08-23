@@ -1910,10 +1910,12 @@
         //
         // IMPORTANT: The anon key is safe in browser apps only because
         // Row Level Security policies restrict every row to auth.uid().
+        require('dotenv').config();
+
         const SUPABASE_CONFIG = {
-            url: 'https://gvlggdualubxovjdmpjo.supabase.co', 
-            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2bGdnZHVhbHVieG92amRtcGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0NTk4MDIsImV4cCI6MjEwMzAzNTgwMn0.HznK4QTDWDO5JDb_UW-FiD9qcZiKvXZ0MfwwPoN-0to'   
-        };
+         url: process.env.SUPABASE_URL,
+         anonKey: process.env.SUPABASE_ANON_KEY
+         };
 
         let supabaseClient = null;
         let currentUser = null;
