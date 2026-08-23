@@ -9,6 +9,7 @@
         href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:wght@400;600;700;800;900&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg: #0f0a1e;
@@ -1001,6 +1002,76 @@
             }
         }
 
+
+
+        /* AUTH / CLOUD SYNC */
+        .auth-panel {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 250;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(26, 19, 50, 0.92);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 900;
+            overflow: hidden;
+        }
+
+        .auth-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .auth-meta {
+            max-width: 180px;
+        }
+
+        .auth-name {
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .auth-status {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 760px) {
+            .auth-panel {
+                left: 88px;
+                right: 12px;
+                top: 12px;
+                justify-content: space-between;
+            }
+
+            .page {
+                padding-top: 82px;
+            }
+        }
+
         /* SKILL BADGES */
         .skill-card {
             background: var(--surface);
@@ -1312,6 +1383,19 @@
 </head>
 
 <body>
+
+
+    <!-- AUTH / CLOUD SYNC -->
+    <div class="auth-panel" id="auth-panel">
+        <div class="auth-avatar" id="auth-avatar">☁️</div>
+        <div class="auth-meta">
+            <div class="auth-name" id="auth-name">Local mode</div>
+            <div class="auth-status" id="auth-status">Set Supabase keys to enable cloud database</div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="auth-login-btn" onclick="handleGoogleLogin()">Google Login</button>
+        <button class="btn btn-ghost btn-sm" id="auth-logout-btn" onclick="handleLogout()"
+            style="display:none;">Logout</button>
+    </div>
 
     <!-- SIDEBAR -->
     <nav class="sidebar" id="sidebar">
@@ -1814,6 +1898,28 @@
         // DATA STORE
         // ============================================================
         const STORAGE_KEY = 'studycore_home_data';
+        const CLOUD_SYNC_KEY = 'studycore_cloud_sync_enabled';
+
+        // ============================================================
+        // PRODUCTION DATABASE CONFIG
+        // ============================================================
+        // 1) Create a Supabase project.
+        // 2) Run studycore_supabase_schema.sql in Supabase SQL Editor.
+        // 3) Enable Google OAuth in Authentication > Providers.
+        // 4) Paste your project URL and anon public key below.
+        //
+        // IMPORTANT: The anon key is safe in browser apps only because
+        // Row Level Security policies restrict every row to auth.uid().
+        const SUPABASE_CONFIG = {
+            url: '',       // e.g. 'https://xxxx.supabase.co'
+            anonKey: ''    // e.g. 'eyJhbGciOiJIUzI1NiIs...'
+        };
+
+        let supabaseClient = null;
+        let currentUser = null;
+        let cloudReady = false;
+        let saveTimer = null;
+        let lastCloudSaveAt = null;
 
         let store = {
             userName: 'Student',
@@ -1853,26 +1959,183 @@
         // ============================================================
         // PERSISTENCE
         // ============================================================
-        function save() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-            } catch (e) { console.warn('Save failed:', e); }
+        function sanitizeStore(p) {
+            return {
+                userName: p?.userName || 'Student',
+                tasks: Array.isArray(p?.tasks) ? p.tasks : [],
+                weekGoals: Array.isArray(p?.weekGoals) ? p.weekGoals : [],
+                monthPlans: p?.monthPlans && typeof p.monthPlans === 'object' ? p.monthPlans : {},
+                subjects: Array.isArray(p?.subjects) ? p.subjects : [],
+                skills: Array.isArray(p?.skills) ? p.skills : [],
+                youtubeVideos: Array.isArray(p?.youtubeVideos) ? p.youtubeVideos : [],
+            };
         }
 
-        function load() {
+        function readLocalStore() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const p = JSON.parse(raw);
-                    store.userName = p.userName || 'Student';
-                    store.tasks = p.tasks || [];
-                    store.weekGoals = p.weekGoals || [];
-                    store.monthPlans = p.monthPlans || {};
-                    store.subjects = p.subjects || [];
-                    store.skills = p.skills || [];
-                    store.youtubeVideos = p.youtubeVideos || [];
+                return raw ? sanitizeStore(JSON.parse(raw)) : null;
+            } catch (e) {
+                console.warn('Local load failed:', e);
+                return null;
+            }
+        }
+
+        async function initAuth() {
+            const hasConfig = SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey;
+            if (!hasConfig || !window.supabase) {
+                cloudReady = false;
+                updateAuthUI();
+                return;
+            }
+
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
+                    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+                });
+
+                const { data, error } = await supabaseClient.auth.getUser();
+                if (error) console.warn('Auth check failed:', error.message);
+                currentUser = data?.user || null;
+                cloudReady = !!currentUser;
+
+                supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+                    const oldUserId = currentUser?.id;
+                    currentUser = session?.user || null;
+                    cloudReady = !!currentUser;
+                    updateAuthUI();
+
+                    if (currentUser && currentUser.id !== oldUserId) {
+                        await load();
+                        updateSubjectDropdowns();
+                        renderDashboard();
+                        renderMonthPlanner();
+                        toast('☁️ Cloud database connected.');
+                    }
+                });
+            } catch (e) {
+                console.warn('Supabase init failed. Falling back to local mode:', e);
+                supabaseClient = null;
+                currentUser = null;
+                cloudReady = false;
+            }
+            updateAuthUI();
+        }
+
+        async function handleGoogleLogin() {
+            if (!supabaseClient) {
+                toast('Add Supabase URL and anon key first.');
+                return;
+            }
+            await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+        }
+
+        async function handleLogout() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            currentUser = null;
+            cloudReady = false;
+            const local = readLocalStore();
+            if (local) store = local;
+            updateAuthUI();
+            renderDashboard();
+            renderMonthPlanner();
+            toast('Signed out. Local mode enabled.');
+        }
+
+        function updateAuthUI(syncLabel = null) {
+            const loginBtn = document.getElementById('auth-login-btn');
+            const logoutBtn = document.getElementById('auth-logout-btn');
+            const nameEl = document.getElementById('auth-name');
+            const statusEl = document.getElementById('auth-status');
+            const avatarEl = document.getElementById('auth-avatar');
+            if (!loginBtn || !logoutBtn || !nameEl || !statusEl || !avatarEl) return;
+
+            if (!supabaseClient) {
+                loginBtn.style.display = 'inline-flex';
+                logoutBtn.style.display = 'none';
+                nameEl.textContent = 'Local mode';
+                statusEl.textContent = 'Set Supabase keys to enable cloud database';
+                avatarEl.innerHTML = '☁️';
+                return;
+            }
+
+            if (!currentUser) {
+                loginBtn.style.display = 'inline-flex';
+                logoutBtn.style.display = 'none';
+                nameEl.textContent = 'Not signed in';
+                statusEl.textContent = 'Google login required for cloud sync';
+                avatarEl.innerHTML = 'G';
+                return;
+            }
+
+            const meta = currentUser.user_metadata || {};
+            const displayName = meta.full_name || meta.name || currentUser.email || 'Student';
+            loginBtn.style.display = 'none';
+            logoutBtn.style.display = 'inline-flex';
+            nameEl.textContent = displayName;
+            statusEl.textContent = syncLabel || (lastCloudSaveAt ? `Cloud saved ${lastCloudSaveAt}` : 'Cloud database connected');
+            if (meta.avatar_url) avatarEl.innerHTML = `<img src="${meta.avatar_url}" alt="avatar">`;
+            else avatarEl.textContent = displayName.charAt(0).toUpperCase();
+        }
+
+        function save() {
+            // Always keep a local backup for offline mode and safer migrations.
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+            } catch (e) { console.warn('Local save failed:', e); }
+
+            if (!supabaseClient || !currentUser) return;
+            window.clearTimeout(saveTimer);
+            updateAuthUI('Saving to cloud…');
+            saveTimer = window.setTimeout(saveToCloud, 450);
+        }
+
+        async function saveToCloud() {
+            if (!supabaseClient || !currentUser) return;
+            try {
+                const { error } = await supabaseClient
+                    .from('studycore_user_data')
+                    .upsert({ user_id: currentUser.id, data: store, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+                if (error) throw error;
+                lastCloudSaveAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                updateAuthUI();
+            } catch (e) {
+                console.warn('Cloud save failed:', e);
+                updateAuthUI('Cloud save failed — local backup kept');
+                toast('Cloud save failed. Local backup kept.');
+            }
+        }
+
+        async function load() {
+            const local = readLocalStore();
+            if (local) store = local;
+
+            if (!supabaseClient || !currentUser) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('studycore_user_data')
+                    .select('data, updated_at')
+                    .eq('user_id', currentUser.id)
+                    .maybeSingle();
+                if (error) throw error;
+
+                if (data?.data) {
+                    store = sanitizeStore(data.data);
+                    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); } catch (_) { }
+                    lastCloudSaveAt = data.updated_at ? new Date(data.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+                } else if (local) {
+                    // First sign-in: migrate this browser's existing local data into the cloud row.
+                    await saveToCloud();
                 }
-            } catch (e) { console.warn('Load failed:', e); }
+            } catch (e) {
+                console.warn('Cloud load failed. Using local backup:', e);
+                toast('Cloud load failed. Using local backup.');
+            }
+            updateAuthUI();
         }
 
         function resetAllData() {
@@ -2971,8 +3234,9 @@
         // ============================================================
         // INIT
         // ============================================================
-        function init() {
-            load();
+        async function init() {
+            await initAuth();
+            await load();
             document.getElementById('dt-date').value = today();
             document.getElementById('task-date-filter').value = today();
             updateSubjectDropdowns();
@@ -2982,6 +3246,7 @@
 
         init();
     </script>
+    <script>(function () { function c() { var b = a.contentDocument || (a.contentWindow && a.contentWindow.document); if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'a2f7c4b42e193a3c',t:'MTc4NzQ2MzQ3OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
 </html>
